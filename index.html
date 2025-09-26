@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Gemini AI Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+
+        #start-screen,
+        #chat-container {
+            text-align: center;
+        }
+
+        #start-screen {
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        #chat-container {
+            display: none;
+            /* hidden initially */
+        }
+
+        #chatbox {
+            width: 400px;
+            height: 400px;
+            border: 1px solid #aaa;
+            padding: 10px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 8px;
+            margin: 10px auto;
+            text-align: left;
+        }
+
+        #chatbox {
+            width: 400px;
+            height: 400px;
+            padding: 10px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+
+        .user {
+            color: blue;
+            margin: 5px 0;
+        }
+
+        .bot {
+            color: green;
+            margin: 5px 0;
+        }
+
+        .input-area {
+            margin-top: 10px;
+        }
+
+        input {
+            width: 300px;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #aaa;
+        }
+
+        button {
+            padding: 8px 12px;
+            margin-left: 5px;
+            border-radius: 4px;
+            border: none;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .user,
+        .bot {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 20px;
+            margin: 5px;
+            max-width: 75%;
+        }
+
+        .user {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .bot {
+            background: #e0e0e0;
+            color: black;
+            align-self: flex-start;
+        }
+
+        .user,
+        .bot {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <h1>🤖 Welcome to Gemini Chatbot</h1>
+        <p>Click below to start chatting!</p>
+        <button onclick="startChat()">Start Chatting</button>
+    </div>
+
+    <!-- Chat Container -->
+    <div id="chat-container">
+        <h2>Gemini Chatbot 🤖</h2>
+        <div id="chatbox"></div>
+        <div class="input-area">
+            <input type="text" id="inputBox" placeholder="Say something..."
+                onkeypress="if(event.key==='Enter') sendMessage()">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const startScreen = document.getElementById("start-screen");
+        const chatContainer = document.getElementById("chat-container");
+        const chatbox = document.getElementById("chatbox");
+        const apiKey = "AIzaSyDFo3dRATEIkthHSvacGP7AjWbh2bLaSYU"; // your Google API key
+
+        function startChat() {
+            startScreen.style.display = "none";
+            chatContainer.style.display = "block";
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById("inputBox");
+            const userText = input.value.trim();
+            if (!userText) return;
+
+            chatbox.innerHTML += `<div class="user"><b>You:</b> ${userText}</div>`;
+            input.value = "";
+
+            try {
+                const res = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            contents: [{ role: "user", parts: [{ text: userText }] }]
+                        })
+                    }
+                );
+
+                const data = await res.json();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "(no reply)";
+
+                chatbox.innerHTML += `<div class="bot"><b>Bot:</b> ${reply}</div>`;
+                chatbox.scrollTop = chatbox.scrollHeight;
+            } catch (err) {
+                chatbox.innerHTML += `<div class="bot"><b>Bot:</b> (Error talking to Gemini 😢)</div>`;
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+
+</html>
